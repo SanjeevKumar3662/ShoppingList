@@ -60,7 +60,7 @@ function addItemToStorage(item){
 
     itemsFromStorage.push(item);
     //now convert to string and set to local storage
-    localStorage.setItem('items',JSON.stringify(itemsFromStorage));
+    sessionStorage.setItem('items',JSON.stringify(itemsFromStorage));
 }
 
 
@@ -68,12 +68,12 @@ function getItemsFromStorage (){
     
     let itemsFromStorage;//this will be the array
     
-    //if localStorage is empty then make itemFromStorage empty
-    if(localStorage.getItem('items') === null){
+    //if sessionStorage is empty then make itemFromStorage empty
+    if(sessionStorage.getItem('items') === null){
         itemsFromStorage = [];
     }else{
-        //else, get the array(in the from of a string) from localStorage then parse it into an array
-        itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+        //else, get the array(in the from of a string) from sessionStorage then parse it into an array
+        itemsFromStorage = JSON.parse(sessionStorage.getItem('items'));
     }
     
     return itemsFromStorage;
@@ -89,7 +89,7 @@ function removeItem(item) {
     //remove item from DOM
     item.remove();
     
-    //remove item from localStorage
+    //remove item from sessionStorage
     removeItemFromStorage(item.textContent);
     
     checkUI();
@@ -103,9 +103,9 @@ function removeItemFromStorage(item){
     //removing the desired item from array 
     itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
 
-    localStorage.setItem('items',JSON.stringify(itemsFromStorage));
+    sessionStorage.setItem('items',JSON.stringify(itemsFromStorage));
 
-    // localStorage.clear();
+    // sessionStorage.clear();
 
     // itemsFromStorage.forEach((item)=>{
     //     addItemToStorage(item);
@@ -121,7 +121,7 @@ function clearItems(e) {
         }
     }
 
-    localStorage.removeItem('items');
+    sessionStorage.removeItem('items');
 
     checkUI();
 }
