@@ -18,6 +18,7 @@ function reloadItemsFromStorage(){
 function onAddItemSubmit(e) {
     e.preventDefault();
     const newItem = itemInput.value;
+    const itemToEdit = document.querySelector('.edit-mode');
 
     //validation
     if (newItem === '') {
@@ -25,14 +26,21 @@ function onAddItemSubmit(e) {
         return;
     }
 
+    if(isItemExists(newItem)){
+        alert("Item already exists!");
+        itemToEdit.classList.remove('edit-mode');
+        checkUI();
+        return;
+    }
+
     if(isEditMode){
-        const itemToEdit = document.querySelector('.edit-mode');
 
         removeItemFromStorage(itemToEdit.textContent);
         itemToEdit.classList.remove('edit-mode');
         itemToEdit.remove();
         isEditMode = false;
     }
+        
 
     //creating and adding items to the DOM
     addItemToDOM(newItem);
@@ -99,9 +107,16 @@ function onClickItem(e){
     }
 }
 
+function isItemExists(item){
+    const itemsFromStorage = getItemsFromStorage();
+
+    return itemsFromStorage.includes(item);
+}
+
 function setItemToEdit(item){
     isEditMode = true;
 
+    //removing edit-mode class from all items
     List.querySelectorAll('li').forEach(i => i.classList.remove('edit-mode'));
 
     //changing class of item, this will change it's color
