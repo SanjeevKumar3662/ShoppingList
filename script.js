@@ -4,6 +4,9 @@ const List = document.querySelector('#item-list');
 const itemClear = document.querySelector('#clear');
 const clearButton = document.querySelector('#clear');
 const filterButton = document.querySelector('#filter')
+const formButton = itemForm.querySelector('button');
+let isEditMode = false;
+
 
 function reloadItemsFromStorage(){
     const itemsFromStorage = getItemsFromStorage();
@@ -22,10 +25,19 @@ function onAddItemSubmit(e) {
         return;
     }
 
+    if(isEditMode){
+        const itemToEdit = document.querySelector('.edit-mode');
+
+        removeItemFromStorage(itemToEdit.textContent);
+        itemToEdit.classList.remove('edit-mode');
+        itemToEdit.remove();
+        isEditMode = false;
+    }
+
     //creating and adding items to the DOM
     addItemToDOM(newItem);
 
-    //adding to the local storage in the browser
+    //adding to the session storage in the browser
     addItemToStorage(newItem);
 
     //clearing the input
@@ -59,8 +71,8 @@ function addItemToStorage(item){
     
 
     itemsFromStorage.push(item);
-    //now convert to string and set to local storage
-    localStorage.setItem('items',JSON.stringify(itemsFromStorage));
+    //now convert to string and set to session storage
+    sessionStorage.setItem('items',JSON.stringify(itemsFromStorage));
 }
 
 
@@ -68,12 +80,12 @@ function getItemsFromStorage (){
     
     let itemsFromStorage;//this will be the array
     
-    //if localStorage is empty then make itemFromStorage empty
-    if(localStorage.getItem('items') === null){
+    //if sessionStorage is empty then make itemFromStorage empty
+    if(sessionStorage.getItem('items') === null){
         itemsFromStorage = [];
     }else{
-        //else, get the array(in the from of a string) from localStorage then parse it into an array
-        itemsFromStorage = JSON.parse(localStorage.getItem('items'));
+        //else, get the array(in the from of a string) from sessionStorage then parse it into an array
+        itemsFromStorage = JSON.parse(sessionStorage.getItem('items'));
     }
     
     return itemsFromStorage;
@@ -81,21 +93,38 @@ function getItemsFromStorage (){
 
 function onClickItem(e){
     if (e.target.parentElement.classList.contains('remove-item')) {
-        removeItem(e.target.parentElement.parentElement);    
+        removeItem(e.target.parentElement.parentElement);
+    }else{
+        setItemToEdit(e.target);
     }
+}
+
+function setItemToEdit(item){
+    isEditMode = true;
+
+    List.querySelectorAll('li').forEach(i => i.classList.remove('edit-mode'));
+
+    //changing class of item, this will change it's color
+    item.classList.add('edit-mode');
+
+    //changing the button to "update Item"
+    formButton.innerHTML = '<i class="fa-solid fa-pen"></i> Update Item';
+    formButton.style.backgroundColor = '#6496ED';
+
+    itemInput.value = item.textContent;
 }
 
 function removeItem(item) {
     //remove item from DOM
     item.remove();
     
-    //remove item from localStorage
+    //remove item from sessionStorage
     removeItemFromStorage(item.textContent);
     
     checkUI();
 }
 
-//this will remove items from local Storage
+//this will remove items from session Storage
 function removeItemFromStorage(item){
     //getting items that are already in storage
     let itemsFromStorage = getItemsFromStorage();
@@ -103,9 +132,9 @@ function removeItemFromStorage(item){
     //removing the desired item from array 
     itemsFromStorage = itemsFromStorage.filter((i) => i !== item);
 
-    localStorage.setItem('items',JSON.stringify(itemsFromStorage));
+    sessionStorage.setItem('items',JSON.stringify(itemsFromStorage));
 
-    // localStorage.clear();
+    // sessionStorage.clear();
 
     // itemsFromStorage.forEach((item)=>{
     //     addItemToStorage(item);
@@ -121,7 +150,7 @@ function clearItems(e) {
         }
     }
 
-    localStorage.removeItem('items');
+    sessionStorage.removeItem('items');
 
     checkUI();
 }
@@ -135,7 +164,7 @@ function filterItems(e) {
     const text = e.target.value.toLowerCase();
 
     items.forEach(item => {
-        const itemName = item.firstChild.textContent.toLocaleLowerCase();
+        const itemName = item.firstChild.textContent.toLowerCase();
         if(itemName.indexOf(text) != -1){
             item.style.display = 'flex';
         }else{
@@ -146,6 +175,7 @@ function filterItems(e) {
 
 //hiding and showing clearAll and filter buttons
 function checkUI() {
+    itemInput.value = '';
     const items = document.querySelectorAll('li');
 
     //if item list is empty
@@ -157,6 +187,10 @@ function checkUI() {
         clearButton.style.display = 'block';
         filterButton.style.display = 'block'
     }
+
+    formButton.innerHTML = '<i class="fa-solid fa-plus"></i> Submit ';
+    formButton.style.backgroundColor = '#333';
+    isEditMode = false;
 }
 
 //Initializing function
